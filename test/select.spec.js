@@ -2563,7 +2563,7 @@ describe('ui-select tests', function() {
 
       expect($(el).scope().$select.selected).toEqual([]);
     });
-      
+
     it('should allow paste tag from clipboard', function() {
       scope.taggingFunc = function (name) {
         return {
@@ -2879,5 +2879,63 @@ describe('ui-select tests', function() {
       expect(highlight(item, query)).toBe('20<span class="ui-select-highlight">15</span>');
     });
   });
+
+
+  describe('customize equal function', function() {
+    it('should display all items in dropdown without equal function', function() {
+
+
+     var selected=angular.copy(scope.people[0])
+      selected.externalAttr='external';
+      scope.selection={
+        selected:[selected]
+      }
+
+      var el = compileTemplate(
+        '<ui-select multiple ng-model="selection.selected"> \
+          <ui-select-match placeholder="Pick one...">{{$select.selected.name}}</ui-select-match> \
+          <ui-select-choices repeat="person in people | filter: $select.search"> \
+            <div ng-bind-html="person.name | highlight: $select.search"></div> \
+            <div ng-bind-html="person.email | highlight: $select.search"></div> \
+          </ui-select-choices> \
+        </ui-select>'
+      );
+      expect(isDropdownOpened(el)).toEqual(false);
+      openDropdown(el);
+      expect(isDropdownOpened(el)).toEqual(true);
+      $timeout.flush();
+      expect(scope.people.length).toEqual($(el).find('div.ui-select-choices-row').length);
+
+    });
+
+
+    it('should display no selected items in dropdown with equals function', function() {
+
+      scope.equalsFunc = function (item1, item2) {
+        return item1.name===item2.name
+      };
+      var selected=angular.copy(scope.people[0])
+      selected.externalAttr='external';
+      scope.selection={
+        selected:[selected]
+      }
+
+      var el = compileTemplate(
+          '<ui-select multiple ng-model="selection.selected" equals="equalsFunc($item1,$item2)"> \
+            <ui-select-match placeholder="Pick one...">{{$select.selected.name}}</ui-select-match> \
+            <ui-select-choices repeat="person in people | filter: $select.search"> \
+              <div ng-bind-html="person.name | highlight: $select.search"></div> \
+              <div ng-bind-html="person.email | highlight: $select.search"></div> \
+            </ui-select-choices> \
+          </ui-select>'
+      );
+      expect(isDropdownOpened(el)).toEqual(false);
+      openDropdown(el);
+      expect(isDropdownOpened(el)).toEqual(true);
+      $timeout.flush();
+      expect(scope.people.length-1).toEqual($(el).find('div.ui-select-choices-row').length);
+
+    });
+  })
 
 });

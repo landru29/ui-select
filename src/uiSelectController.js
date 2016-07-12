@@ -88,7 +88,7 @@ uis.controller('uiSelectCtrl',
       //reset activeIndex
       if (ctrl.selected && ctrl.items.length && !ctrl.multiple) {
         ctrl.activeIndex = _findIndex(ctrl.items, function(item){
-          return angular.equals(this, item);
+          return ctrl.equals(this, item);
         }, ctrl.selected);
       }
     }
@@ -241,8 +241,8 @@ uis.controller('uiSelectCtrl',
         if ( data !== undefined && data !== null ) {
           var filteredItems = data.filter(function(i) {
             return angular.isArray(selectedItems) ? selectedItems.every(function(selectedItem) {
-              return !angular.equals(i, selectedItem);
-            }) : !angular.equals(i, selectedItems);
+              return !ctrl.equals(i, selectedItem);
+            }) : !ctrl.equals(i, selectedItems);
           });
           ctrl.setItemsFn(filteredItems);
         }
@@ -321,7 +321,7 @@ uis.controller('uiSelectCtrl',
 
   var _isItemSelected = function (item) {
     return (ctrl.selected && angular.isArray(ctrl.selected) &&
-        ctrl.selected.filter(function (selection) { return angular.equals(selection, item); }).length > 0);
+        ctrl.selected.filter(function (selection) { return ctrl.equals(selection, item); }).length > 0);
   };
 
   var disabledItems = [];
@@ -382,7 +382,7 @@ uis.controller('uiSelectCtrl',
               if (item === undefined) {
                 item = ctrl.tagging.fct !== undefined ? ctrl.tagging.fct(ctrl.search) : ctrl.search;
               }
-              if (!item || angular.equals( ctrl.items[0], item ) ) {
+              if (!item || ctrl.equals( ctrl.items[0], item ) ) {
                 return;
               }
             } else {
@@ -472,11 +472,24 @@ uis.controller('uiSelectCtrl',
     }
   };
 
-  // Set default function for locked choices - avoids unnecessary 
+  // Set default function for locked choices - avoids unnecessary
   // logic if functionality is not being used
   ctrl.isLocked = function () {
     return false;
   };
+
+
+  ctrl.equals = function(item1, item2) {
+    if (ctrl.equalsFunc){
+      return $scope.$eval(ctrl.equalsFunc,{
+        $item1:item1,
+        $item2:item2
+      });
+    }else{
+      return angular.equals(item1, item2);
+    }
+  };
+
 
   $scope.$watch(function () {
     return angular.isDefined(ctrl.lockChoiceExpression) && ctrl.lockChoiceExpression !== "";

@@ -126,7 +126,7 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
                   }
                 }
             }
-            if (angular.equals(result,value)){
+            if ($select.equals(result,value)){
               resultMultiple.unshift(list[p]);
               return true;
             }
@@ -320,10 +320,10 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
             // verify the new tag doesn't match the value of a possible selection choice or an already selected item.
             if (
               stashArr.some(function (origItem) {
-                 return angular.equals(origItem, newItem);
+                 return $select.equals(origItem, newItem);
               }) ||
               $select.selected.some(function (origItem) {
-                return angular.equals(origItem, newItem);
+                return $select.equals(origItem, newItem);
               })
             ) {
               scope.$evalAsync(function () {
@@ -431,7 +431,7 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
               if (angular.isObject(mockObj)) {
                 mockObj.isTag = true;
               }
-              if ( angular.equals(mockObj, needle) ) {
+              if ( $select.equals(mockObj, needle) ) {
                 dupeIndex = i;
               }
             }

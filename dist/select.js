@@ -1,7 +1,7 @@
 /*!
  * ui-select
  * http://github.com/angular-ui/ui-select
- * Version: 0.18.1 - 2016-07-10T00:18:10.535Z
+ * Version: 0.18.1 - 2016-07-12T04:42:48.766Z
  * License: MIT
  */
 
@@ -378,7 +378,7 @@ uis.controller('uiSelectCtrl',
       //reset activeIndex
       if (ctrl.selected && ctrl.items.length && !ctrl.multiple) {
         ctrl.activeIndex = _findIndex(ctrl.items, function(item){
-          return angular.equals(this, item);
+          return ctrl.equals(this, item);
         }, ctrl.selected);
       }
     }
@@ -531,8 +531,8 @@ uis.controller('uiSelectCtrl',
         if ( data !== undefined && data !== null ) {
           var filteredItems = data.filter(function(i) {
             return angular.isArray(selectedItems) ? selectedItems.every(function(selectedItem) {
-              return !angular.equals(i, selectedItem);
-            }) : !angular.equals(i, selectedItems);
+              return !ctrl.equals(i, selectedItem);
+            }) : !ctrl.equals(i, selectedItems);
           });
           ctrl.setItemsFn(filteredItems);
         }
@@ -611,7 +611,7 @@ uis.controller('uiSelectCtrl',
 
   var _isItemSelected = function (item) {
     return (ctrl.selected && angular.isArray(ctrl.selected) &&
-        ctrl.selected.filter(function (selection) { return angular.equals(selection, item); }).length > 0);
+        ctrl.selected.filter(function (selection) { return ctrl.equals(selection, item); }).length > 0);
   };
 
   var disabledItems = [];
@@ -672,7 +672,7 @@ uis.controller('uiSelectCtrl',
               if (item === undefined) {
                 item = ctrl.tagging.fct !== undefined ? ctrl.tagging.fct(ctrl.search) : ctrl.search;
               }
-              if (!item || angular.equals( ctrl.items[0], item ) ) {
+              if (!item || ctrl.equals( ctrl.items[0], item ) ) {
                 return;
               }
             } else {
@@ -762,11 +762,24 @@ uis.controller('uiSelectCtrl',
     }
   };
 
-  // Set default function for locked choices - avoids unnecessary 
+  // Set default function for locked choices - avoids unnecessary
   // logic if functionality is not being used
   ctrl.isLocked = function () {
     return false;
   };
+
+
+  ctrl.equals = function(item1, item2) {
+    if (ctrl.equalsFunc){
+      return $scope.$eval(ctrl.equalsFunc,{
+        $item1:item1,
+        $item2:item2
+      });
+    }else{
+      return angular.equals(item1, item2);
+    }
+  };
+
 
   $scope.$watch(function () {
     return angular.isDefined(ctrl.lockChoiceExpression) && ctrl.lockChoiceExpression !== "";
@@ -1069,6 +1082,7 @@ uis.directive('uiSelect',
         $select.baseTitle = attrs.title || 'Select box';
         $select.focusserTitle = $select.baseTitle + ' focus';
         $select.focusserId = 'focusser-' + $select.generatedId;
+        $select.equalsFunc = attrs.equals;
 
         $select.closeOnSelect = function() {
           if (angular.isDefined(attrs.closeOnSelect)) {
@@ -1603,7 +1617,7 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
                   }
                 }
             }
-            if (angular.equals(result,value)){
+            if ($select.equals(result,value)){
               resultMultiple.unshift(list[p]);
               return true;
             }
@@ -1797,10 +1811,10 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
             // verify the new tag doesn't match the value of a possible selection choice or an already selected item.
             if (
               stashArr.some(function (origItem) {
-                 return angular.equals(origItem, newItem);
+                 return $select.equals(origItem, newItem);
               }) ||
               $select.selected.some(function (origItem) {
-                return angular.equals(origItem, newItem);
+                return $select.equals(origItem, newItem);
               })
             ) {
               scope.$evalAsync(function () {
@@ -1908,7 +1922,7 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
               if (angular.isObject(mockObj)) {
                 mockObj.isTag = true;
               }
-              if ( angular.equals(mockObj, needle) ) {
+              if ( $select.equals(mockObj, needle) ) {
                 dupeIndex = i;
               }
             }
